@@ -3,3 +3,4 @@ data/
 *.pt
 .venv/
 __pycache__/
+scripts/test.py
