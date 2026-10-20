@@ -47,7 +47,11 @@ def main():
     use_amp = device.type == "cuda"
     run_dir = os.path.join(args.out_dir, f"w{args.width}_s{args.seed}")
     os.makedirs(run_dir, exist_ok=True)
-
+    # Skip runs that already finished (allows resuming the ablation after a Colab cut)
+    if os.path.exists(os.path.join(run_dir, "summary.json")):
+        print(f"{run_dir} already done, skipping")
+        return
+    
     # Data
     train_ds = PatchDataset(load_split("train", args.data_dir),
                             samples_per_epoch=args.samples_per_epoch)
