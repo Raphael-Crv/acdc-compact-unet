@@ -1,6 +1,7 @@
 """Inference and evaluation helpers shared by training and evaluation."""
 import numpy as np
 import torch
+from scipy.ndimage import label
 
 
 @torch.no_grad()
@@ -25,3 +26,14 @@ def dice_per_class(pred, gt, classes=(1, 2, 3)):
         denom = p.sum() + g.sum()
         scores.append(1.0 if denom == 0 else 2 * np.logical_and(p, g).sum() / denom)
     return np.array(scores)
+
+def keep_largest_component(pred, classes=(1, 2, 3)):
+    """For each class, keep only its largest 3D connected component."""
+    out = np.zeros_like(pred)
+    for c in classes:
+        components, n = label(pred == c)
+        if n == 0:
+            continue
+        sizes = np.bincount(components.ravel())[1:]  # skip label 0 (outside the class)
+        out[components == sizes.argmax() + 1] = c
+    return out
